@@ -30,6 +30,12 @@ static inline int order_of_size(int size){
 
 static inline int units(int order){ return 1 << order; }
 
+extern C int atexit(void (*)(void));
+static void cleanup(){
+    if (STATE){ delete [] STATE; STATE = 0; }
+    if (MAXFREE){ delete [] MAXFREE; MAXFREE = 0; }
+}
+
 static void init_impl(int ram_size, int min_block){
     if (STATE){ delete [] STATE; STATE = 0; }
     if (MAXFREE){ delete [] MAXFREE; MAXFREE = 0; }
@@ -42,6 +48,7 @@ static void init_impl(int ram_size, int min_block){
     MAXFREE = new int[TREE_N];
     for (int i=0;i<TREE_N;i++){ STATE[i]=NODE_FREE; MAXFREE[i]=-1; }
     STATE[1] = NODE_FREE; MAXFREE[1] = TOP;
+    atexit(cleanup);
 }
 
 static inline void ensure_children(int node, int order){
